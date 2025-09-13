@@ -1,0 +1,19 @@
+import { AuthService } from './auth.service';
+export declare class AuthController {
+    private authService;
+    constructor(authService: AuthService);
+    register(userData: any): Promise<any>;
+    login(loginData: {
+        email: string;
+        password: string;
+    }): Promise<{
+        access_token: string;
+        user: {
+            id: any;
+            name: any;
+            email: any;
+            ecoPoints: any;
+            totalCarbonReduction: any;
+        };
+    }>;
+}
