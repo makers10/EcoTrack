@@ -295,4 +295,56 @@ export class ProfileService {
       shareUrl: `https://ecotrack.app/profile/${user.username}`,
     };
   }
+
+  // =====================================
+  // 🔥 NEW: Smart Recommendations & Goals
+  // =====================================
+  async getGoalProgress(userId: string) {
+    const user = await this.userModel.findById(userId);
+    const profile = await this.profileModel.findOne({ userId });
+    if (!user || !profile) throw new NotFoundException('Profile data missing');
+
+    const totalSaved = profile.totalCarbonSaved || 0;
+    const goal = user.carbonSavingGoal || 100;
+    const percentage = Math.min((totalSaved / goal) * 100, 100);
+
+    return {
+      goal,
+      current: totalSaved,
+      percentage,
+      remaining: Math.max(goal - totalSaved, 0),
+      period: user.goalPeriod || 'monthly',
+    };
+  }
+
+  async setPersonalGoal(userId: string, goal: number, period: string) {
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { carbonSavingGoal: goal, goalPeriod: period },
+      { new: true }
+    );
+  }
+
+  async getRecommendations(userId: string) {
+    const topActivities = await this.getTopActivities(userId);
+    const history = await this.getUserHistory(userId);
+
+    const recs = [];
+    
+    if (history.length < 3) {
+      recs.push({ title: "Plant your first seed", desc: "Start logging your commute carbon to see your first impact.", impact: 'Medium' });
+    }
+
+    const hasComposted = history.some(h => h.activity.toLowerCase().includes('compost'));
+    if (!hasComposted) {
+      recs.push({ title: "Start Composting", desc: "Reduce landfill waste by 30%.", impact: 'High' });
+    }
+
+    const bikingImpact = topActivities.find(a => a._id.toLowerCase().includes('bike'))?.totalSaved || 0;
+    if (bikingImpact > 5) {
+      recs.push({ title: "E-Bike Transition", desc: "You love cycling! Try an E-bike for longer commutes to save 2x CO₂.", impact: 'High' });
+    }
+
+    return recs.slice(0, 3);
+  }
 }

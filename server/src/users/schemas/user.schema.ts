@@ -21,6 +21,12 @@ export class User extends Document {
   @Prop({ default: 0 })
   totalCarbonReduction: number;
 
+  @Prop({ default: 100 })
+  carbonSavingGoal: number;
+
+  @Prop({ default: 'monthly', enum: ['daily', 'weekly', 'monthly', 'yearly'] })
+  goalPeriod: string;
+
   @Prop({ type: [String], default: [] })
   preferences: string[];
 

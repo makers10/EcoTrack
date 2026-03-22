@@ -109,4 +109,22 @@ export class ProfileController {
   async getAchievements(@Param('userId') userId: string) {
     return this.profileService.getUserAchievements(userId);
   }
+
+  @Get('analytics/goal-progress/:userId')
+  async getGoalProgress(@Param('userId') userId: string) {
+    return this.profileService.getGoalProgress(userId);
+  }
+
+  @Get('analytics/recommendations/:userId')
+  async getRecommendations(@Param('userId') userId: string) {
+    return this.profileService.getRecommendations(userId);
+  }
+
+  @Post('analytics/goal/:userId')
+  async setGoal(
+    @Param('userId') userId: string,
+    @Body() body: { goal: number; period: string }
+  ) {
+    return this.profileService.setPersonalGoal(userId, body.goal, body.period);
+  }
 }
